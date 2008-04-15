@@ -174,7 +174,7 @@ def process(payload):
                 subject = msg['Subject'].lower()
                 # Strip leading and trailing spaces
                 subject = subject.strip(' ')
-                if subject == config.subject:
+                if subject == config.subject.lower():
                     logger.debug("Subject on new request is accepted.")
                     new_request(sender)
                 else:

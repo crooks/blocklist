@@ -16,11 +16,6 @@
 # or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 # for more details.
 
-# The keyring of remops keys, used during remop verification.
-keyring = '/home/crooks/rab/keyring'
-# Path to the echolot thesaurus where adminkey files can be found.
-keypath = '/home/pinger/echolot/results/thesaurus'
-
 # Fully-qualified path to the rab.blk file we will read/write.
 rabfile = '/home/rab/rab/data/rab.blk'
 
@@ -31,9 +26,9 @@ loglevel = 'info'
 
 # The secret key we use for hash authentication
 secret = "Telephone boxes make my pet onion cry"
-# We insist on a valid Subject on new requests so as not to auto-respon to
-# spam emails with false From headers.  This should be lower-case.
-subject = "block request"
+# We insist on a valid Subject on new requests so as not to auto-respond to
+# spam emails with false From headers.
+subject = "Block Request"
 
 # Fully-qualified path to the requests db.
 reqfile = "/home/rab/rab/data/request.db"
