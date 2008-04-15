@@ -1,0 +1,14 @@
+Subject: RAB subscription failed
+
+Your application to the Remailer Abuse Blocklist was unsuccessful.  The
+confirmation email we received from you was incorrect.  That's to say, it was
+corrupted in some way or was returned to the wrong confirmation address.
+
+If you are trying to subscribe and haven't received a confirmation request,
+please send an email to rab@blocklist.mixmin.net.  If you do have a
+confirmation request, please try sending another mail to the Reply-To address
+in that email.  Please ensure that you send your confirmation using your mail
+client's Reply functionality, not by sending a new email.
+
+Regards
+RAB Administrators

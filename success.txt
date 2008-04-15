@@ -1,0 +1,11 @@
+Subject: Congratulations, your address has been added to the RAB.
+
+Your application to the Remailer Abuse Blocklist has been successfully
+processed.  There may be a delay of up to 24 hours whilst this update is
+propagated to the participating Anonymous Remailers.  If you continue to
+receive unwanted emails via remailers after this time, please contact the abuse
+address supplied on those emails.  It may be that the operator is not
+participating in the RAB scheme.
+
+Regards
+RAB Administrators

@@ -1,0 +1,17 @@
+Subject: Duplicate request for subscription to Remailer Abuse Blocklist
+
+This email is a response to a request to subscribe your email address to the
+Remailer Abuse Blocklist.  If you didn't submit this request, please ignore
+this email; someone else has attempted to submit your address.  If however you
+did submit such a request, please read on.
+
+You appear to have submitted a duplicate subscription request.  Please ensure
+that when you respond to this email you use the correct address, as specified
+in the From and Reply-To headers of this email.
+
+To prevent abuse of your email address, you will receive no further infomation
+in relation to this service for 24 hours.  After that, you may resubmit your
+request if desired.
+
+Regards
+RAB Administrators
