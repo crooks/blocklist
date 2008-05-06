@@ -249,9 +249,14 @@ def confirm(sender, recipient):
         return False
 
 def writerab(sender):
-    """Read the entire master list, try and add our new entry, then write
-    the list back out again along with the hashed entries for the published
-    list.  If no sender is passed, just rewrite the files."""
+    """Check if the Master DB contains the new address, if it does, just
+    update the timestamp.  If it doesn't, add an entry for it with the current
+    timestamp.  Lastly, write the text rab.blk file in either plain or hashed
+    format depending on configuration (config.hashoutput).
+
+    Updating the timestamp on existing entries allows for potential future
+    functionality for expiring old addresses.  This will only really be
+    required if the list grows to an unexpected volume of addresses."""
     timestamp = utcnow()
     if sender:
         if master.has_key(sender):
