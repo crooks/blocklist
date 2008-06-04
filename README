@@ -1,0 +1,54 @@
+Overview
+========
+This program is designed to process requests for email addresses to be
+appended to the Remailer Abuse Blocklist.  It expects to be passed an email
+address or an email from which to extract a sender address.  This address is then
+confirmed by way of a Challange Response.
+
+The program relies on the following files:
+  Python Scripts
+  ==============
+  rab.py          Main Python program
+  config.py       Configuration file in Python format
+
+  Text files
+  ----------
+  All of these filenames (and paths) are configurable in config.py.
+  request.txt	  An Email payload to send with confirmation requests
+  duprequest.txt  Email payload for duplicated requests
+  failed.txt	  Email payload for failed requests
+  success.txt	  Email payload for successfull block requests
+  rab.blk         The downloadable rab.blk file
+
+  Database files
+  --------------
+  All of these filenames (and paths) are configurable in config.py.
+  request.db      New RAB requests
+  dupcheck.db     Duplicated requests
+  master.db       The RAB database
+  All database files are of BerkeleyDB format.  In all three the format is
+  identical:
+  Key:Email Address    Data:Timestamp
+
+  Web Interface
+  -------------
+  rab.html        Plain HTML file describing use of the RAB
+  rab.cgi         CGI interface for submitting addresses
+
+Duplicate Checking
+==================
+This program includes duplicate checking functionality to prevent repeated
+requests from being used as a means to annoy/flood a 3rd party.
+
+When a new request is submitted, the address and timestamp are inserted into
+the requests database.  If this address is resubmitted, it is responded to and
+inserted into the duplicates database.  Further resubmissions will receive no
+further responses for a configurable period of time.  Correct challange
+responses will be processed.
+
+Format of rab.blk file
+======================
+The rab.blk file contains email addresses, one per line.  A configuration
+option enables the file to be written with hashed output instead of plain text
+in order to prevent address harvesting.  Processing of this hashed format
+requires a planned update to Mixmaster.
