@@ -25,8 +25,6 @@ import smtplib
 import sys
 import datetime
 import email
-import os.path
-from os import rename
 
 def init_logging():
     """Initialise logging.  This should be the first thing done so that all
