@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # 
 # vim: tabstop=4 expandtab shiftwidth=4 noautoindent
+#
+# $Id$
 
 import re
 import cgi

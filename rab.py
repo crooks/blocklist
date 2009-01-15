@@ -5,6 +5,7 @@
 # rab.py -- Control program for the Remailer Abuse Blocklist
 #
 # Copyright (C) 2005 Steve Crook <steve@mixmin.org>
+# $Id$
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by the

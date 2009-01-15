@@ -7,7 +7,7 @@ did submit such a request, please read on.
 
 In order to complete your subscription to the blocklist you need to respond to
 this email, keeping the content intact.  In other words, don't create a new
-email but rather use your email application's Reply functionality to create a
+email, instead use your email application's Reply functionality to create a
 response.  Once this response has been processed, you will receive confirmation
 of your successful subscription.
 
