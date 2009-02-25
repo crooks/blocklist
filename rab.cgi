@@ -94,7 +94,7 @@ def sendmail(address):
     """Call Python's smtplib routine to send an email."""
     msg = "From: %s\n" % (address,)
     msg = msg + "To: rab@blocklist.mixmin.net\n"
-    msg = msg + "Subject: RAB\n"
+    msg = msg + "Subject: Block Request\n"
     server = smtplib.SMTP('localhost')
     server.set_debuglevel(1)
     server.sendmail(address, "rab@blocklist.mixmin.net", msg)
