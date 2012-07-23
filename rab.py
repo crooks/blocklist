@@ -27,6 +27,7 @@ import sys
 import datetime
 import email
 
+
 def init_logging():
     """Initialise logging.  This should be the first thing done so that all
     further operations are logged."""
@@ -41,6 +42,7 @@ def init_logging():
     logger.addHandler(hdlr)
     logger.setLevel(level)
 
+
 def address_hash(address):
     """Take a plain-text address and convert it to a sha1 hash.  We use
     this function when configured to output a hashed rab.blk file."""
@@ -48,6 +50,7 @@ def address_hash(address):
     hexsha = s.hexdigest()
     logger.debug('Address %s hashes to %s', address, hexsha)
     return hexsha
+
 
 def genhash(sender, timestamp):
     """Create a hash to use as a key for confirming requests.  The key
@@ -58,11 +61,13 @@ def genhash(sender, timestamp):
     logger.debug("Generated a hash of: %s", s.hexdigest())
     return s.hexdigest()
 
+
 def myaddress():
     """Join myname and mydomain config parameters to create an email address
     for the blocklist"""
     addy = "%s@%s" % (config.myname, config.mydomain)
     return addy
+
 
 def utcnow():
     """Just return the utc time.  Everything should work on utc."""
@@ -70,13 +75,16 @@ def utcnow():
     utcstamp = utctime.strftime("%Y-%m-%d %H:%M:%S")
     return utcstamp
 
+
 def hours_ago(past_hours):
     """Return a timestamp for a given number of hours prior to utc. This
     is used by housekeeping to clear expired entries from the request and
     dupcheck databases."""
-    thentime = datetime.datetime.utcnow() - datetime.timedelta(hours=past_hours)
+    thentime = (datetime.datetime.utcnow() -
+                datetime.timedelta(hours=past_hours))
     timestamp = thentime.strftime("%Y-%m-%d %H:%M:%S")
     return timestamp
+
 
 def opendbs():
     """The RAB functions around three bsddb style databases. All of them are
@@ -98,6 +106,7 @@ def opendbs():
     logger.debug("Opening RAB master database at %s", config.masterfile)
     master = bsddb.hashopen(config.masterfile)
 
+
 def closedbs():
     """Close the various bsddb databases."""
     logger.debug("Closing request database at %s", config.reqfile)
@@ -107,6 +116,7 @@ def closedbs():
     logger.debug("Closing RAB master database at %s", config.masterfile)
     master.close()
 
+
 def clean_address(addr):
     """Cleanup and return an email address"""
     # Strip linefeeds from the address.
@@ -114,6 +124,7 @@ def clean_address(addr):
     # Make sure the address is entirely lower case
     addr = addr.lower()
     return addr
+
 
 def new_request(sender):
     """New requests start here, as do duplicate new requests.  We give
@@ -123,26 +134,29 @@ def new_request(sender):
     hours from the last attempt."""
     logger.info("Entering new request process for %s", sender)
     timestamp = utcnow()
-    if request.has_key(sender):
+    if sender in request:
         logger.info("Address %s is already in the request database", sender)
         # This email address has already been processed today. Has it
         # been seen twice?
-        if not dupcheck.has_key(sender):
+        if not sender in dupcheck:
             # It's not been seen twice, send a duplicate email.
-            logger.info("Address %s is a first-time duplicate, will resend", sender)
+            logger.info("Address %s is a first-time duplicate, will resend"
+                        % sender)
             key = genhash(sender, request[sender])
             email_create(config.duplicate_payload, sender, key)
             logger.debug("Adding %s to duplicates database", sender)
             dupcheck[sender] = timestamp
         else:
             # We've twice sent a confirm request, time to ignore.
-            logger.warn("Ignoring request from %s, we sent two confirms already.", sender)
+            logger.warn("Ignoring request from %s, we sent two confirms "
+                        "already." % sender)
     else:
         # There is no entry for this email address, treat it as new.
-        logger.debug("We have a new block request from %s", sender)
+        logger.debug("We have a new block request from %s" % sender)
         key = genhash(sender, timestamp)
         request[sender] = timestamp
         email_create(config.request_payload, sender, key)
+
 
 def process(payload):
     """This is where it all starts to happen.  The function expects to be
@@ -154,9 +168,10 @@ def process(payload):
     is_email = re.compile(r'[\w\-][\w\-\.]*@[\w\-][\w\-\.]+[a-zA-Z]{1,4}$')
     if is_email.match(payload):
         sender = clean_address(payload)
-        logger.info("We have been passed an address %s.  Treating as new request.", sender)
+        logger.info("We have been passed an address %s.  Treating as new "
+                    "request." % sender)
         new_request(sender)
-    else:    
+    else:
         msg = email.message_from_string(payload)
         # Use email Utils to extract the address from the From and To fields.
         # We don't use the real names but we get them anyway.
@@ -165,8 +180,8 @@ def process(payload):
         logger.info("Processing RAB email from %s", sender)
         recipname, recipient = email.Utils.parseaddr(msg['X-Original-To'])
         logger.debug("Recipient is %s", recipient)
-        # If the recipient is exactly my address, this cannot be a confirmation as
-        # there's no delimiter and extension.  Treat it as a new request.
+        # If the recipient is exactly my address, this cannot be a confirmation
+        # as there's no delimiter and extension.  Treat it as a new request.
         if recipient == myaddress():
             logger.debug("Recipient matches my configured address.")
             if msg['Subject']:
@@ -177,13 +192,16 @@ def process(payload):
                     logger.debug("Subject on new request is accepted.")
                     new_request(sender)
                 else:
-                    logger.info("Invalid Subject on new request.  Not processing.")
+                    logger.info("Invalid Subject on new request. "
+                                "Not processing.")
             else:
-                logger.warn("No Subject header on new request. Not processing.")
-        # It's not an exact match to my address, so does it start with my name and
-        # a '+' delimiter?  If so, treat it as a confirmation email.
+                logger.warn("No Subject header on new request. Not "
+                            "processing.")
+        # It's not an exact match to my address, so does it start with my name
+        # and a '+' delimiter?  If so, treat it as a confirmation email.
         elif recipient.startswith(config.myname + "+"):
-            logger.debug("Recipient starts with my address, looks like a confirmation request.")
+            logger.debug("Recipient starts with my address, looks like a "
+                         "confirmation request.")
             if confirm(sender, recipient):
                 logger.info("Attempting to add %s to the RAB", sender)
                 writerab(sender)
@@ -193,13 +211,15 @@ def process(payload):
                 email_create(config.success_payload, sender, False)
             else:
                 logger.info("Address %s is not added to the RAB", sender)
-                # If the sender if in the duplicates database, don't send failure
-                # emails as their address might be under attack.
-                if not dupcheck.has_key(sender):
-                    logger.debug("%s not in duplicates db, sending failure email", sender)
+                # If the sender if in the duplicates database, don't send
+                # failure emails as their address might be under attack.
+                if not sender in dupcheck:
+                    logger.debug("%s not in duplicates db, sending failure "
+                                 "email" % sender)
                     email_create(config.failed_payload, sender, False)
                 else:
-                    logger.info("Not sending failure notice to %s due to duplicate flag", sender)
+                    logger.info("Not sending failure notice to %s due to "
+                                "duplicate flag" % sender)
                 # We update the dupcheck database with the current timestamp.
                 # This prevents abuse for 24 hours from now.
                 dupcheck[sender] = utcnow()
@@ -210,6 +230,7 @@ def process(payload):
         else:
             logger.warn("Unrecognized recipient %s. Giving up.", recipient)
     logger.debug("Closing databases")
+
 
 def confirm(sender, recipient):
     """The confirmation process breaks down the recipient email address into
@@ -224,15 +245,17 @@ def confirm(sender, recipient):
     sentkey, domain = therest.split('@', 1)
     logger.debug("Splitting key and domain gives %s and %s", sentkey, domain)
     if name != config.myname:
-        logger.warn("Recipient %s doesn't match configured %s", name, config.myname)
+        logger.warn("Recipient %s doesn't match configured %s"
+                    % (name, config.myname))
         return False
     if domain != config.mydomain:
-        logger.warn("Received domain %s doesn't match configured %s", domain, config.mydomain)
+        logger.warn("Received domain %s doesn't match configured %s"
+                    % (domain, config.mydomain))
         return False
     if len(sentkey) != 40:
         logger.warn("We expected a 40char hash, we didn't get it.")
         return False
-    if request.has_key(sender):
+    if sender in request:
         logger.debug("Confirming request from %s", sender)
         timestamp = request[sender]
         key = genhash(sender, timestamp)
@@ -240,12 +263,15 @@ def confirm(sender, recipient):
             logger.debug("Key received from %s is correct", sender)
             return True
         else:
-            logger.info("Key received from %s is wrong, not accepting it", sender)
+            logger.info("Key received from %s is wrong, not accepting it"
+                        % sender)
             return False
     else:
         # The confirmation sender isn't listed in the requests database.
-        logger.info("Confirmation email from %s but not expecting one", sender)
+        logger.info("Confirmation email from %s but not expecting one"
+                    % sender)
         return False
+
 
 def writerab(sender):
     """Check if the Master DB contains the new address, if it does, just
@@ -258,10 +284,12 @@ def writerab(sender):
     required if the list grows to an unexpected volume of addresses."""
     timestamp = utcnow()
     if sender:
-        if master.has_key(sender):
-            logger.info("RAB file already contains address %s.  Updating timestamp", sender)
+        if sender in master:
+            logger.info("RAB file already contains address %s.  Updating "
+                        "timestamp" % sender)
         else:
-            logger.info("Address %s not in RAB, adding with timestamp %s", sender, timestamp)
+            logger.info("Address %s not in RAB, adding with timestamp %s"
+                        % (sender, timestamp))
         master[sender] = timestamp
     else:
         logger.info("Not passed a sender, just refreshing lists.")
@@ -279,6 +307,7 @@ def writerab(sender):
             rab.write(entry + "\n")
     rab.close()
 
+
 def email_create(filename, recipient, key):
     """Create an email for responding to subscription requests.  This
     could be a new request or a duplicate depending on the filename."""
@@ -287,12 +316,14 @@ def email_create(filename, recipient, key):
     recipient = recipient.rstrip('\n')
     if key:
         logger.debug("Creating a confirmation email to %s", recipient)
-        msg = "From: Remailer Abuse Blocklist <%s+%s@%s>\n" % (config.myname, key, config.mydomain)
-        msg = msg + "Reply-To: %s+%s@%s\n" % (config.myname, key, config.mydomain)
+        msg = ("From: Remailer Abuse Blocklist <%s+%s@%s>\n"
+               % (config.myname, key, config.mydomain))
+        msg += "Reply-To: %s+%s@%s\n" % (config.myname, key, config.mydomain)
     else:
         logger.debug("Creating a basic email to %s", recipient)
-        msg = "From: Remailer Abuse Blocklist <%s@%s>\n" % (config.myname, config.mydomain)
-    msg = msg + "To: %s\n" % (recipient,)
+        msg = ("From: Remailer Abuse Blocklist <%s@%s>\n"
+               % (config.myname, config.mydomain))
+    msg += "To: %s\n" % (recipient,)
     try:
         request = open(filename, "r")
     except IOError:
@@ -304,6 +335,7 @@ def email_create(filename, recipient, key):
         msg = msg + line
     sendmail(recipient, msg)
 
+
 def sendmail(recipient, msg):
     """Call Python's smtplib routine to send an email."""
     logger.info("Sending email to %s", recipient)
@@ -311,6 +343,7 @@ def sendmail(recipient, msg):
     #server.set_debuglevel(1)
     server.sendmail(myaddress(), recipient, msg)
     server.quit()
+
 
 def housekeeping():
     """Housekeeping checks the timestamps in the requests and dupcheck DB's.
@@ -322,21 +355,26 @@ def housekeeping():
     for address in request.keys():
         if request[address] < age:
             logger.debug("%s has expired in requests.", address)
-            if not dupcheck.has_key(address):
-                logger.info("%s not in duplicates, deleting from requests.", address)
+            if not address in dupcheck:
+                logger.info("%s not in duplicates, deleting from requests."
+                            % address)
                 del request[address]
             elif dupcheck[address] < age:
-                logger.debug("%s expired in dupcheck and requests. Deleting both", address)
+                logger.debug("%s expired in dupcheck and requests. Deleting "
+                             "both" % address)
                 del request[address]
                 del dupcheck[address]
             else:
-                logger.debug("%s expired in requests but still valid in dupcheck.", address)
+                logger.debug("%s expired in requests but still valid in "
+                             "dupcheck." % address)
     # If requests DB is empty then so should dupcheck be empty.  You can't
     # have a duplicate of something you don't have!
     if len(request) == 0:
-        logger.debug("Request DB is empty.  Checking dupcheck DB is also empty.")
+        logger.debug("Request DB is empty.  Checking dupcheck DB is also "
+                     "empty.")
         if len(dupcheck) != 0:
-            logger.warn("Database dupcheck is not empty.  It should be! Deleting entries.")
+            logger.warn("Database dupcheck is not empty.  It should be! "
+                        "Deleting entries.")
             for address in dupcheck.keys():
                 logger.info("Deleting %s from dupcheck.", address)
                 del dupcheck[address]
@@ -344,39 +382,42 @@ def housekeeping():
     dupcheck.sync()
     logger.debug("Housekeeping complete")
 
+
 def listrab():
     """Do nothing other than list the content of the Master Database."""
     for entry in master.keys():
         print entry, master[entry]
 
+
 def delrabkey(key):
     """Delete a given email entry from any databases it occurs in."""
-    if master.has_key(key):
+    if key in master:
         logger.info("Deleting %s from Master DB at operator request", key)
         del master[key]
         master.sync()
         writerab(None)
-    if request.has_key(key):
+    if key in request:
         logger.info("Deleting %s from Request DB at operator request", key)
         del request[key]
         request.sync()
-    if dupcheck.has_key(key):
+    if key in dupcheck:
         logger.info("Deleting %s from Duplicate DB at operator request", key)
         del dupcheck[key]
         dupcheck.sync()
-        
+
 
 def cleanup(sender):
     """Cleanup takes an email address and removes it from the request and
     dupcheck databases (if it's in them)."""
     # If the request db has the sender in it, delete them.
-    if request.has_key(sender):
+    if sender in request:
         logger.debug("Removing %s from requests database", sender)
         del request[sender]
     # If the dupcheck db has the send in it, delete them.
-    if dupcheck.has_key(sender):
+    if sender in dupcheck:
         logger.debug("Removing %s from duplicates database", sender)
         del dupcheck[sender]
+
 
 def validate_command(cmd):
     cmds = ["refresh", "list", "add", "delete"]
@@ -390,6 +431,7 @@ def validate_command(cmd):
     else:
         sys.stdout.write("Not passed a command\n")
         sys.exit(1)
+
 
 def main():
     opendbs()
@@ -411,7 +453,7 @@ def main():
         # The main processing routine.  All else is called from there.
         input = sys.stdin.read()
         process(input)
-    closedbs() 
+    closedbs()
 
 # As always, initialize logging before anything else.
 init_logging()
