@@ -252,8 +252,8 @@ def confirm(sender, recipient):
         logger.warn("Received domain %s doesn't match configured %s"
                     % (domain, config.mydomain))
         return False
-    if len(sentkey) != 40:
-        logger.warn("We expected a 40char hash, we didn't get it.")
+    if len(sentkey) != 56:
+        logger.warn("We expected a 56char hash, we didn't get it.")
         return False
     if sender in request:
         logger.debug("Confirming request from %s", sender)
