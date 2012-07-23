@@ -21,7 +21,7 @@ import config
 import logging
 import re
 import bsddb
-import sha
+import hashlib
 import smtplib
 import sys
 import datetime
@@ -44,10 +44,9 @@ def init_logging():
 
 
 def address_hash(address):
-    """Take a plain-text address and convert it to a sha1 hash.  We use
+    """Take a plain-text address and convert it to a sha256 hash.  We use
     this function when configured to output a hashed rab.blk file."""
-    s = sha.new(address)
-    hexsha = s.hexdigest()
+    hexsha = hashlib.sha256(address).digest().encode("hex")
     logger.debug('Address %s hashes to %s', address, hexsha)
     return hexsha
 
@@ -55,11 +54,12 @@ def address_hash(address):
 def genhash(sender, timestamp):
     """Create a hash to use as a key for confirming requests.  The key
     consists of a secret+email_address+timestamp."""
-    s = sha.new(config.secret)
+    s = hashlib.sha224(config.secret)
     s.update(sender)
     s.update(timestamp)
-    logger.debug("Generated a hash of: %s", s.hexdigest())
-    return s.hexdigest()
+    hexsha = s.digest().encode("hex")
+    logger.debug("Generated a hash of: %s" % hexsha)
+    return hexsha
 
 
 def myaddress():
