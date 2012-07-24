@@ -55,7 +55,7 @@ def address_hash(address):
 def genhash(sender, timestamp):
     """Create a hash to use as a key for confirming requests.  The key
     consists of a secret+email_address+timestamp."""
-    s = hashlib.sha224(config.secret)
+    s = hashlib.sha224(config.get('general', 'secret'))
     s.update(sender)
     s.update(timestamp)
     hexsha = s.digest().encode("hex")
@@ -66,7 +66,8 @@ def genhash(sender, timestamp):
 def myaddress():
     """Join myname and mydomain config parameters to create an email address
     for the blocklist"""
-    addy = "%s@%s" % (config.myname, config.mydomain)
+    addy = "%s@%s" % (config.get('general', 'myname'),
+                      config.get('general', 'mydomain'))
     return addy
 
 
@@ -98,23 +99,26 @@ def opendbs():
     As we use all these databases for every aspect of functionality, we
     unconditionally open them all."""
     global request
-    log.debug("Opening request database at %s", config.reqfile)
-    request = bsddb.hashopen(config.reqfile)
+    log.debug("Opening request database: %s"
+              % config.get('paths', 'request_db'))
+    request = bsddb.hashopen(config.get('paths', 'request_db'))
     global dupcheck
-    log.debug("Opening dupcheck database at %s", config.dupfile)
-    dupcheck = bsddb.hashopen(config.dupfile)
+    log.debug("Opening dupcheck database: %s"
+              % config.get('paths', 'duplicate_db'))
+    dupcheck = bsddb.hashopen(config.get('paths', 'duplicate_db'))
     global master
-    log.debug("Opening RAB master database at %s", config.masterfile)
-    master = bsddb.hashopen(config.masterfile)
+    log.debug("Opening RAB master database: %s"
+              % config.get('paths', 'master_db'))
+    master = bsddb.hashopen(config.get('paths', 'master_db'))
 
 
 def closedbs():
     """Close the various bsddb databases."""
-    log.debug("Closing request database at %s", config.reqfile)
+    log.debug("Closing request database")
     request.close()
-    log.debug("Closing dupcheck database at %s", config.dupfile)
+    log.debug("Closing dupcheck database")
     dupcheck.close()
-    log.debug("Closing RAB master database at %s", config.masterfile)
+    log.debug("Closing RAB master database")
     master.close()
 
 
@@ -144,7 +148,7 @@ def new_request(sender):
             log.info("Address %s is a first-time duplicate, will resend"
                         % sender)
             key = genhash(sender, request[sender])
-            email_create(config.duplicate_payload, sender, key)
+            email_create(config.get('paths', 'duplicate_txt'), sender, key)
             log.debug("Adding %s to duplicates database", sender)
             dupcheck[sender] = timestamp
         else:
@@ -156,7 +160,7 @@ def new_request(sender):
         log.debug("We have a new block request from %s" % sender)
         key = genhash(sender, timestamp)
         request[sender] = timestamp
-        email_create(config.request_payload, sender, key)
+        email_create(config.get('paths', 'request_txt'), sender, key)
 
 
 def process(payload):
@@ -189,7 +193,7 @@ def process(payload):
                 subject = msg['Subject'].lower()
                 # Strip leading and trailing spaces
                 subject = subject.strip(' ')
-                if subject == config.subject.lower():
+                if subject == config.get('general', 'subject').lower():
                     log.debug("Subject on new request is accepted.")
                     new_request(sender)
                 else:
@@ -199,7 +203,7 @@ def process(payload):
                 log.warn("No Subject header on new request. Not processing.")
         # It's not an exact match to my address, so does it start with my name
         # and a '+' delimiter?  If so, treat it as a confirmation email.
-        elif recipient.startswith(config.myname + "+"):
+        elif recipient.startswith(config.get('general', 'myname') + "+"):
             log.debug("Recipient starts with my address, looks like a "
                       "confirmation request.")
             if confirm(sender, recipient):
@@ -208,7 +212,8 @@ def process(payload):
                 cleanup(sender)
                 # We need to pass False to create_email as there's no hash key
                 # on a success email.
-                email_create(config.success_payload, sender, False)
+                email_create(config.get('paths', 'success_txt'), sender,
+                             False)
             else:
                 log.info("Address %s is not added to the RAB", sender)
                 # If the sender if in the duplicates database, don't send
@@ -216,7 +221,8 @@ def process(payload):
                 if not sender in dupcheck:
                     log.debug("%s not in duplicates db, sending failure "
                               "email" % sender)
-                    email_create(config.failed_payload, sender, False)
+                    email_create(config.get('paths', 'failed_txt'), sender,
+                                 False)
                 else:
                     log.info("Not sending failure notice to %s due to "
                              "duplicate flag" % sender)
@@ -244,13 +250,13 @@ def confirm(sender, recipient):
     log.debug("Splitting recipient name gives %s", name)
     sentkey, domain = therest.split('@', 1)
     log.debug("Splitting key and domain gives %s and %s", sentkey, domain)
-    if name != config.myname:
+    if name != config.get('general', 'myname'):
         log.warn("Recipient %s doesn't match configured %s"
-                 % (name, config.myname))
+                 % (name, config.get('general', 'myname')))
         return False
-    if domain != config.mydomain:
+    if domain != config.get('general', 'mydomain'):
         log.warn("Received domain %s doesn't match configured %s"
-                    % (domain, config.mydomain))
+                    % (domain, config.get('general', 'mydomain')))
         return False
     if len(sentkey) != 56:
         log.warn("We expected a 56char hash, we didn't get it.")
@@ -294,13 +300,14 @@ def writerab(sender):
     else:
         log.info("Not passed a sender, just refreshing lists.")
     try:
-        rab = open(config.rabfile, "w")
+        rab = open(config.get('paths', 'outfile'), "w")
     except IOError:
-        log.error("Unable to open %s for writing.", config.rabfile)
+        log.error("Unable to open %s for writing."
+                  % config.get('paths', 'outfile'))
     # Within the next loop we actually write the RAB text file, either in
     # plain text or in hashed format depending on config.hashoutput.
     for entry in master.keys():
-        if config.hashoutput:
+        if config.getbool('general', 'hash_output'):
             hash = address_hash(entry)
             rab.write(hash + "\n")
         else:
@@ -317,12 +324,16 @@ def email_create(filename, recipient, key):
     if key:
         log.debug("Creating a confirmation email to %s", recipient)
         msg = ("From: Remailer Abuse Blocklist <%s+%s@%s>\n"
-               % (config.myname, key, config.mydomain))
-        msg += "Reply-To: %s+%s@%s\n" % (config.myname, key, config.mydomain)
+               % (config.get('general', 'myname'), key,
+                  config.get('general', 'mydomain')))
+        msg += ("Reply-To: %s+%s@%s\n"
+                % (config.get('general', 'myname'), key,
+                   config.get('general', 'mydomain')))
     else:
         log.debug("Creating a basic email to %s", recipient)
         msg = ("From: Remailer Abuse Blocklist <%s@%s>\n"
-               % (config.myname, config.mydomain))
+               % (config.get('general', 'myname'),
+                  config.get('general', 'mydomain')))
     msg += "To: %s\n" % (recipient,)
     try:
         request = open(filename, "r")
