@@ -17,7 +17,7 @@
 # or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 # for more details.
 
-from Config import config
+from rab.Config import config
 import logging
 import re
 import bsddb
@@ -470,7 +470,8 @@ def main():
             delrabkey(args[1])
     else:
         # The main processing routine.  All else is called from there.
-        sys.stdout.write("Enter address (or email) then Ctrl-D to submit.\n")
+        sys.stdout.write("Welcome to the Remailer Abuse Blocklist\n")
+        sys.stdout.write("Enter email address then Ctrl-D to submit.\n")
         input = sys.stdin.read()
         process(input)
     closedbs()

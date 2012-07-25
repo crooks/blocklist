@@ -57,7 +57,7 @@ config.add_section('general')
 config.set('general', 'subject', 'Block Request')
 config.set('general', 'mydomain', 'domain.invalid')
 config.set('general', 'myname', 'Remailer Blocklist')
-config.set('general', 'hash_output', 0)
+config.set('general', 'hash_output', 'no')
 config.set('general', 'trim_keys', 20)
 # Try to be clever about guessing my email name.
 if '/' in homedir:
@@ -128,5 +128,5 @@ if not config.has_option('paths', 'failed_txt'):
     config.set('paths', 'failed_txt',
                os.path.join(config.get('paths', 'etc'), 'failed.txt'))
 
-with open('samples/rabrc', 'wb') as configfile:
-    config.write(configfile)
+#with open('samples/rabrc', 'wb') as configfile:
+#    config.write(configfile)
