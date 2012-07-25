@@ -299,19 +299,25 @@ def writerab(sender):
         master[sender] = timestamp
     else:
         log.info("Not passed a sender, just refreshing lists.")
-    try:
-        rab = open(config.get('paths', 'outfile'), "w")
-    except IOError:
-        log.error("Unable to open %s for writing."
-                  % config.get('paths', 'outfile'))
+    rablist = []
+    if os.path.isfile(config.get('paths', 'outfile')):
+        rab = open(config.get('paths', 'outfile'), "r")
+        for line in rab:
+            rablist.append(line.rstrip())
+        rab.close()
+    rab = open(config.get('paths', 'outfile'), "w")
     # Within the next loop we actually write the RAB text file, either in
     # plain text or in hashed format depending on config.hashoutput.
+    for entry in rablist:
+        rab.write(entry + "\n")
     for entry in master.keys():
-        if config.getbool('general', 'hash_output'):
-            hash = address_hash(entry)
-            rab.write(hash + "\n")
+        if config.getboolean('general', 'hash_output'):
+            new_entry = address_hash(entry)
         else:
-            rab.write(entry + "\n")
+            new_entry = entry
+        if new_entry not in rablist:
+            log.info("%s: Writing new entry to RAB" % new_entry)
+            rab.write(new_entry + "\n")
     rab.close()
 
 
