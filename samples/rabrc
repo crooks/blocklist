@@ -1,0 +1,28 @@
+[paths]
+basedir = /home/crooks/rab
+log = /home/crooks/rab/log
+lib = /home/crooks/rab/lib
+etc = /home/crooks/rab/etc
+outfile = /home/crooks/rab/dest.blk
+request_db = /home/crooks/rab/lib/request.db
+duplicate_db = /home/crooks/rab/lib/duplicate.db
+master_db = /home/crooks/rab/lib/master.db
+request_txt = /home/crooks/rab/etc/request.txt
+duplicate_txt = /home/crooks/rab/etc/duplicate.txt
+success_txt = /home/crooks/rab/etc/success.txt
+failed_txt = /home/crooks/rab/etc/failed.txt
+
+[logging]
+level = debug
+format = %(asctime)s %(levelname)s %(message)s
+datefmt = %Y-%m-%d %H:%M:%S
+
+[general]
+subject = Block Request
+mydomain = fleegle.mixmin.net
+myname = Remailer Blocklist
+hash_output = 0
+trim_keys = 20
+myaddy = crooks
+secret = foobar
+
