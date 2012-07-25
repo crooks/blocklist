@@ -58,15 +58,15 @@ def genhash(sender, timestamp):
     s = hashlib.sha224(config.get('general', 'secret'))
     s.update(sender)
     s.update(timestamp)
-    hexsha = s.digest().encode("hex")
+    hexsha = s.digest().encode("hex")[:config.getint('general', 'trim_keys')]
     log.debug("Generated a hash of: %s" % hexsha)
     return hexsha
 
 
 def myaddress():
-    """Join myname and mydomain config parameters to create an email address
+    """Join myaddy and mydomain config parameters to create an email address
     for the blocklist"""
-    addy = "%s@%s" % (config.get('general', 'myname'),
+    addy = "%s@%s" % (config.get('general', 'myaddy'),
                       config.get('general', 'mydomain'))
     return addy
 
@@ -203,7 +203,7 @@ def process(payload):
                 log.warn("No Subject header on new request. Not processing.")
         # It's not an exact match to my address, so does it start with my name
         # and a '+' delimiter?  If so, treat it as a confirmation email.
-        elif recipient.startswith(config.get('general', 'myname') + "+"):
+        elif recipient.startswith(config.get('general', 'myaddy') + "+"):
             log.debug("Recipient starts with my address, looks like a "
                       "confirmation request.")
             if confirm(sender, recipient):
@@ -250,15 +250,15 @@ def confirm(sender, recipient):
     log.debug("Splitting recipient name gives %s", name)
     sentkey, domain = therest.split('@', 1)
     log.debug("Splitting key and domain gives %s and %s", sentkey, domain)
-    if name != config.get('general', 'myname'):
+    if name != config.get('general', 'myaddy'):
         log.warn("Recipient %s doesn't match configured %s"
-                 % (name, config.get('general', 'myname')))
+                 % (name, config.get('general', 'myaddy')))
         return False
     if domain != config.get('general', 'mydomain'):
         log.warn("Received domain %s doesn't match configured %s"
                     % (domain, config.get('general', 'mydomain')))
         return False
-    if len(sentkey) != 56:
+    if len(sentkey) != config.getint('general', 'trim_keys'):
         log.warn("We expected a 56char hash, we didn't get it.")
         return False
     if sender in request:
@@ -324,15 +324,15 @@ def email_create(filename, recipient, key):
     if key:
         log.debug("Creating a confirmation email to %s", recipient)
         msg = ("From: Remailer Abuse Blocklist <%s+%s@%s>\n"
-               % (config.get('general', 'myname'), key,
+               % (config.get('general', 'myaddy'), key,
                   config.get('general', 'mydomain')))
         msg += ("Reply-To: %s+%s@%s\n"
-                % (config.get('general', 'myname'), key,
+                % (config.get('general', 'myaddy'), key,
                    config.get('general', 'mydomain')))
     else:
         log.debug("Creating a basic email to %s", recipient)
         msg = ("From: Remailer Abuse Blocklist <%s@%s>\n"
-               % (config.get('general', 'myname'),
+               % (config.get('general', 'myaddy'),
                   config.get('general', 'mydomain')))
     msg += "To: %s\n" % (recipient,)
     try:
@@ -391,7 +391,7 @@ def housekeeping():
                 del dupcheck[address]
     request.sync()
     dupcheck.sync()
-    logger.debug("Housekeeping complete")
+    log.debug("Housekeeping complete")
 
 
 def listrab():
@@ -462,6 +462,7 @@ def main():
             delrabkey(args[1])
     else:
         # The main processing routine.  All else is called from there.
+        sys.stdout.write("Enter address (or email) then Ctrl-D to submit.\n")
         input = sys.stdin.read()
         process(input)
     closedbs()

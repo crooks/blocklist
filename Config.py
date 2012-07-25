@@ -57,11 +57,12 @@ config.add_section('general')
 config.set('general', 'subject', 'Block Request')
 config.set('general', 'mydomain', 'domain.invalid')
 config.set('general', 'hash_output', 0)
+config.set('general', 'trim_keys', 20)
 # Try to be clever about guessing my email name.
 if '/' in homedir:
-    config.set('general', 'myname', homedir.rsplit('/', 1)[1])
+    config.set('general', 'myaddy', homedir.rsplit('/', 1)[1])
 else:
-    config.set('general', 'myname', homedir)
+    config.set('general', 'myaddy', homedir)
 
 
 # Try and process the .mail2newsrc file.  If it doesn't exist, we bailout
