@@ -323,16 +323,18 @@ def email_create(filename, recipient, key):
     recipient = recipient.rstrip('\n')
     if key:
         log.debug("Creating a confirmation email to %s", recipient)
-        msg = ("From: Remailer Abuse Blocklist <%s+%s@%s>\n"
-               % (config.get('general', 'myaddy'), key,
+        msg = ("From: %s <%s+%s@%s>\n"
+               % (config.get('general', 'myname'),
+                  config.get('general', 'myaddy'), key,
                   config.get('general', 'mydomain')))
         msg += ("Reply-To: %s+%s@%s\n"
                 % (config.get('general', 'myaddy'), key,
                    config.get('general', 'mydomain')))
     else:
         log.debug("Creating a basic email to %s", recipient)
-        msg = ("From: Remailer Abuse Blocklist <%s@%s>\n"
-               % (config.get('general', 'myaddy'),
+        msg = ("From: %s <%s@%s>\n"
+               % (config.get('general', 'myname'),
+                  config.get('general', 'myaddy'),
                   config.get('general', 'mydomain')))
     msg += "To: %s\n" % (recipient,)
     try:
