@@ -210,5 +210,5 @@ RAB Administrators
 """)
     f.close()
 
-#with open('samples/rabrc', 'wb') as configfile:
+#with open('rabrc', 'w') as configfile:
 #    config.write(configfile)

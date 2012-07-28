@@ -1,28 +1,85 @@
-[paths]
-basedir = /home/crooks/rab
-log = /home/crooks/rab/log
-lib = /home/crooks/rab/lib
-etc = /home/crooks/rab/etc
-outfile = /home/crooks/rab/dest.blk
-request_db = /home/crooks/rab/lib/request.db
-duplicate_db = /home/crooks/rab/lib/duplicate.db
-master_db = /home/crooks/rab/lib/master.db
-request_txt = /home/crooks/rab/etc/request.txt
-duplicate_txt = /home/crooks/rab/etc/duplicate.txt
-success_txt = /home/crooks/rab/etc/success.txt
-failed_txt = /home/crooks/rab/etc/failed.txt
+## This sample config file lists all the options known to the rab program.
+## Each option is commented out and displayed with its default value.  Very few
+## of these are expected to be changed by the user but they offer the maximum
+## flexibility.  The only options that must be set are 'secret' and
+## 'mydomain', both in the 'general'
+## section.
 
-[logging]
-level = debug
-format = %(asctime)s %(levelname)s %(message)s
-datefmt = %Y-%m-%d %H:%M:%S
+## When defining an option, don't forget to uncomment the associated header!
 
 [general]
-subject = Block Request
-mydomain = fleegle.mixmin.net
-myname = Remailer Blocklist
-hash_output = 0
-trim_keys = 20
-myaddy = crooks
-secret = foobar
+## The rab only accepts requests that include a properly formatted Subject.
+## Without this, every spam email will result in an outbound confirmation
+## request to whatever address is in the From header.
+#subject = Block Request
 
+## The domain name element of the rab's email address.  If the email address
+## is rab@remailer.domain, the domain is remailer.domain.
+mydomain = set me to something!
+
+## As above but this is the component on the right-side of the @.  If this
+## isn't specified, the program will make a best guess based on the homedir.
+#myaddy = rab
+
+## The textual element of the From header that will be used on outbound
+## messages.  E.g. Remailer Blocklist <rab@my.domain>.
+#myname = Remailer Blocklist
+
+## Currently this option is unsupported by Mixmaster.  When the rab is used
+## to create a publicly published blocklist, the content will be hashed to
+## prevent harvesting of addresses.
+#hash_output = no
+
+## How long should the hash element of challenge responses be trimmed to.  If
+## this exceeds 56 (a hex-encoded SHA224 hash), the full length will be
+## assumed.
+#trim_keys = 20
+
+## Challenge responses are salted with a secret.  This must be defined or the
+## program will abort.
+secret = set me to something!
+
+#[paths]
+## By default, all paths are relative to basedir.  If only basedir is defined,
+## everything else will be within it.  If it's not defined, the program will
+## assume ~/rab/.
+#basedir = /home/rab/rab
+
+## Path to the log directory where the rab.log file will be created.  Take
+## note, this log is not automatically rotated.
+#log = /home/rab/rab/log
+
+## Path to the lib directory where Berkeley DB files will be created.
+#lib = /home/rab/rab/lib
+
+## Path to the etc directory where user-definable files live.
+#etc = /home/rab/rab/etc
+
+## The fully-qualified path to where the dest.blk file should be written.
+## This is the file that must be presented to Mixmaster.
+#outfile = /home/rab/rab/dest.blk
+
+## Paths to the three database files that (by default) reside under the lib
+## directory.
+#request_db = /home/rab/rab/lib/request.db
+#duplicate_db = /home/rab/rab/lib/duplicate.db
+#master_db = /home/rab/rab/lib/master.db
+
+## Paths to the four text files used to create email responses to incoming
+## block requests.  By default these are all within basedir/etc/.
+#request_txt = /home/rab/rab/etc/request.txt
+#duplicate_txt = /home/rab/rab/etc/duplicate.txt
+#success_txt = /home/rab/rab/etc/success.txt
+#failed_txt = /home/rab/rab/etc/failed.txt
+
+#[logging]
+## The log level can be error, warn, info or debug.
+#level = debug
+
+## The format used by the Python logging library when writing log entries.
+#format = %(asctime)s %(levelname)s %(message)s
+
+## The data format used by the Pythong logging library.
+#datefmt = %Y-%m-%d %H:%M:%S
+
+# vim: tabstop=4 expandtab syntax=config
