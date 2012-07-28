@@ -9,16 +9,14 @@ The program relies on the following files:
   Python Scripts
   ==============
   rab.py          Main Python program
-  config.py       Configuration file in Python format
 
   Text files
   ----------
-  All of these filenames (and paths) are configurable in config.py.
+  All of these filenames (and paths) are configurable in ~/.rabrc
   request.txt	  An Email payload to send with confirmation requests
   duprequest.txt  Email payload for duplicated requests
   failed.txt	  Email payload for failed requests
   success.txt	  Email payload for successful block requests
-  rab.blk         The downloadable rab.blk file
 
   Database files
   --------------
