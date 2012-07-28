@@ -1,4 +1,5 @@
 include README
+include INSTALL
 include CHANGES
 include LICENSE
 include samples/rabrc

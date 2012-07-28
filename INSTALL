@@ -1,0 +1,32 @@
+The following command will install the blocklist program:-
+
+	python setup.py install
+
+This needs to be run by a user with write permissions to the Python
+dist-packages directory. In most cases this will be root.  See the MANIFEST.in
+file for a list of the files that will be installed.
+
+Next, stop being root and login with the system account that will provide the
+rab service.  This can be any user you like but remember, you need to pass
+messages for this account to the rab program so it's best not to use an account
+where you also receive non-rab email.
+
+After installation, a new exectable "rab" will be available.  If this is run
+without a configuration file in place, an error will be returned.  A sample
+rabrc file can be found in the samples directory of this package.  By default
+the program expects to find this in ~/.rabrc.  This can be overriden with the
+MIXBLK environment variable.
+
+After creation of the rabrc file, running the program will create all the required
+directories and files.  By default these will all be under ~/rab/.
+
+Once everything is working to your satisfaction, you'll need to configure your
+MTA (or Procmail) to pass messages to the rab executable.
+
+If you use Procmail, a recipe like this will do it:
+
+:0
+| /usr/local/bin/rab
+
+
+That's it, you're done!
