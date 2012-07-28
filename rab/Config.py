@@ -55,7 +55,6 @@ config.set('logging', 'datefmt', '%Y-%m-%d %H:%M:%S')
 
 config.add_section('general')
 config.set('general', 'subject', 'Block Request')
-config.set('general', 'mydomain', 'domain.invalid')
 config.set('general', 'myname', 'Remailer Blocklist')
 config.set('general', 'hash_output', 'no')
 config.set('general', 'trim_keys', 20)
@@ -77,11 +76,19 @@ if os.path.isfile(configfile):
 else:
     sys.stdout.write("%s: Config file not found.\n" % configfile)
     sys.exit(1)
+
 # Compulsory settings that have no defaults.
 if not config.has_option('general', 'secret'):
     sys.stdout.write("%s: Secret phrase for hash salting much be set.\n"
                      % configfile)
     sys.exit(1)
+# Special instace to warn if mydomain isn't defined.
+if not config.has_option('general', 'mydomain'):
+    sys.stdout.write("%s: mydomain is not defined.  This is okay for testing "
+                     "but very unlikely to work on a live system.\n"
+                     % configfile)
+    config.set('general', 'mydomain', 'domain.invalid')
+
 # Now we check the directory structure exists and is valid.
 if config.has_option('paths', 'basedir'):
     basedir = config.get('paths', 'basedir')
