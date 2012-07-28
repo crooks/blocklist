@@ -128,5 +128,87 @@ if not config.has_option('paths', 'failed_txt'):
     config.set('paths', 'failed_txt',
                os.path.join(config.get('paths', 'etc'), 'failed.txt'))
 
+# Write the default text files if they don't exist.
+if not os.path.isfile(config.get('paths', 'request_txt')):
+    f = open(config.get('paths', 'request_txt'), 'w')
+    f.write("""\
+Subject: Request for subscription to Remailer Abuse Blocklist
+
+This email is a response to a request to subscribe your email address to the
+Remailer Abuse Blocklist.  If you didn't submit this request, please ignore
+this email; someone else has attempted to submit your address.  If however you
+did submit such a request, please read on.
+
+In order to complete your subscription to the blocklist you need to respond to
+this email, keeping the content intact.  In other words, don't create a new
+email, instead use your email application's Reply functionality to create a
+response.  Once this response has been processed, you will receive confirmation
+of your successful subscription.
+
+We apologise if this process appears complicated but it is important to ensure
+that your request is a genuine one and not a forgery.
+
+Regards
+RAB Administrators
+""")
+    f.close()
+if not os.path.isfile(config.get('paths', 'duplicate_txt')):
+    f = open(config.get('paths', 'duplicate_txt'), 'w')
+    f.write("""\
+Subject: Duplicate request for subscription to Remailer Abuse Blocklist
+
+This email is a response to a request to subscribe your email address to the
+Remailer Abuse Blocklist.  If you didn't submit this request, please ignore
+this email; someone else has attempted to submit your address.  If however you
+did submit such a request, please read on.
+
+You appear to have submitted a duplicate subscription request.  Please ensure
+that when you respond to this email you use the correct address, as specified
+in the From and Reply-To headers of this email.
+
+To prevent abuse of your email address, you will receive no further infomation
+in relation to this service for 24 hours.  After that, you may resubmit your
+request if desired.
+
+Regards
+RAB Administrators
+""")
+    f.close()
+if not os.path.isfile(config.get('paths', 'success_txt')):
+    f = open(config.get('paths', 'success_txt'), 'w')
+    f.write("""\
+Subject: Congratulations, your address has been added to the RAB.
+
+Your application to the Remailer Abuse Blocklist has been successfully
+processed.  There may be a delay of up to 24 hours whilst this update is
+propagated to the participating Anonymous Remailers.  If you continue to
+receive unwanted emails via remailers after this time, please contact the abuse
+address supplied on those emails.  It may be that the operator is not
+participating in the RAB scheme.
+
+Regards
+RAB Administrators
+""")
+    f.close()
+if not os.path.isfile(config.get('paths', 'failed_txt')):
+    f = open(config.get('paths', 'failed_txt'), 'w')
+    f.write("""\
+Subject: RAB subscription failed
+
+Your application to the Remailer Abuse Blocklist was unsuccessful.  The
+confirmation email we received from you was incorrect.  That's to say, it was
+corrupted in some way or was returned to the wrong confirmation address.
+
+If you are trying to subscribe and haven't received a confirmation request,
+please send an email to rab@blocklist.mixmin.net.  If you do have a
+confirmation request, please try sending another mail to the Reply-To address
+in that email.  Please ensure that you send your confirmation using your mail
+client's Reply functionality, not by sending a new email.
+
+Regards
+RAB Administrators
+""")
+    f.close()
+
 #with open('samples/rabrc', 'wb') as configfile:
 #    config.write(configfile)
